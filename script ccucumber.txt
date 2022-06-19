@@ -1,0 +1,86 @@
+#language: pt
+Funcionalidade: Execucoes automaticas do Customer DNA
+	Como Tester
+	Eu quero inserir dados no portal Lojas
+	Para Utiliza-los nos testes
+
+Cenario: Deve validar os cartoes
+	Dado Que acesso a pagina do Portal Loja
+	Quando Informo o Usuario, senha e inicia a Sessao
+	Quando Acesso a Pesquisa de Cliente
+	Quando Indico o cartao a ser pesquisado 
+	E Clico no Link do cartao gerado	
+	Quando Valido se o estado do cartão e Branco
+
+
+
+
+---------------------------------------------------------------------------------------------------------
+
+import static org.junit.Assert.assertEquals;
+
+import java.util.concurrent.TimeUnit;
+
+import org.easetech.easytest.annotation.DataLoader;
+import org.easetech.easytest.annotation.Param;
+import org.easetech.easytest.runner.DataDrivenTestRunner;
+import org.junit.runner.RunWith;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+
+import cucumber.api.java.pt.Dado;
+import cucumber.api.java.pt.Quando;
+
+@RunWith(DataDrivenTestRunner.class)
+@DataLoader(filePaths = "C:\\Worten\\Automação\\Java\\DNACucumber\\src\\test\\resources\\listaCartaoParaValidar.csv")
+public class ValidaCartoes {
+	private WebDriver navegador;
+
+	@Dado("^Que acesso a pagina do Portal Loja$")
+	public void queAcessoAPaginaDoPortalLoja() throws Throwable {
+		// Prepara o navegador
+        System.setProperty("webdriver.chrome.driver","C:\\Worten\\Automacao\\chromedriver.exe");		
+		navegador = new ChromeDriver();
+		navegador.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+		
+		// Navegando para a página do Portal Loja
+		navegador.get("http://cartaowortenlojapp");		
+	}
+
+	@Quando("^Informo o Usuario, senha e inicia a Sessao$")
+	public void informoOUsuarioSenhaEIniciaASessao() throws Throwable {
+
+		// Digitar no input id "ctl00_PlaceHolderMain_signInControl_UserName" o nome do Usuario "petronio"
+		navegador.findElement(By.id("ctl00_PlaceHolderMain_signInControl_UserName")).sendKeys("petronio");
+
+		// Digitar no input id "ctl00_PlaceHolderMain_signInControl_password" a Senha "Dominant20"
+		navegador.findElement(By.id("ctl00_PlaceHolderMain_signInControl_password")).sendKeys("Dominant20");
+		
+		// Clicar no input de id "ctl00_PlaceHolderMain_signInControl_login" para Iniciar a Sessão
+		navegador.findElement(By.id("ctl00_PlaceHolderMain_signInControl_login")).click();
+	}
+	
+	@Quando("^Acesso a Pesquisa de Cliente$")
+	public void acessoAPesquisaDeCliente() throws Throwable {
+		navegador.findElement(By.xpath("//span[text()='Pesquisa de Cliente']")).click();
+	}
+
+	@Quando("^Indico o cartao a ser pesquisado$")
+	public void indicoOCartaoASerPesquisado(@Param(name="cartao")String cartao) throws Throwable {
+	    navegador.findElement(By.id("ctl00_ctl26_g_8d88e86f_506e_43e6_8736_82bbd32cf8f8_txtCardNumber")).sendKeys(cartao);
+	    navegador.findElement(By.id("ctl00_ctl26_g_8d88e86f_506e_43e6_8736_82bbd32cf8f8_btnSearch")).click();
+	}
+
+	@Quando("^Clico no Link do cartao gerado$")
+	public void clicoNoLinkDoCartaoGerado() throws Throwable {
+		navegador.findElement(By.xpath("//a[substring(text(),1,4)=\"1900\"]")).click();
+	}
+
+	@Quando("^Valido se o estado do cartão e Branco$")
+	public void validoSeOEstadoDoCartaoEBranco() throws Throwable {
+		String estadoCartao = navegador.findElement(By.id("ctl00_ctl26_g_667f2fe6_09d7_4a3c_8221_cfb4ce44bab6_lblStateValue")).getText();
+		assertEquals("B - Branco",estadoCartao);		
+	}
+
+}	
